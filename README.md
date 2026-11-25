@@ -1,59 +1,210 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛒 Aplikasi Kasir
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi kasir toko berbasis web yang dibangun dengan **Laravel 12** dan **MySQL**. Dipakai untuk mengelola produk, melayani transaksi penjualan, mencetak struk, dan melihat laporan penjualan.
 
-## About Laravel
+Project ini dibuat sebagai tugas mata kuliah Pemrograman Framework (studi kasus: Kasir).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Autentikasi** login dan logout berbasis session
+- **Dua peran pengguna**
+  - **Admin**: kelola kategori, kelola produk, lihat laporan, dan semua fitur kasir
+  - **Kasir**: dashboard, transaksi penjualan, riwayat, dan struk
+- **CRUD Kategori** dan **CRUD Produk** (dengan pencarian dan pagination)
+- **Transaksi kasir**
+  - pilih produk dan jumlah, total dan kembalian dihitung otomatis
+  - stok berkurang otomatis, transaksi ditolak jika stok atau uang bayar kurang
+  - seluruh proses disimpan dalam satu database transaction (berhasil semua atau batal semua)
+  - struk transaksi yang bisa dicetak
+- **Riwayat transaksi** dengan filter tanggal
+- **Dashboard**: total produk, stok menipis, jumlah transaksi dan omzet hari ini
+- **Laporan penjualan** per rentang tanggal, termasuk penjualan per produk (khusus admin)
+- **REST API** dasar untuk produk dan statistik (opsional, lihat bagian API)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Teknologi
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Komponen | Versi / Keterangan |
+|---|---|
+| PHP | 8.2 atau lebih baru |
+| Framework | Laravel 12 |
+| Database | postgreSQL |
+| Tampilan | Blade + CSS sederhana |
+| Dependency manager | Composer |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Struktur Database
 
-### Premium Partners
+```
+users ──< transactions ──< transaction_items >── products >── categories
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Tabel | Isi |
+|---|---|
+| `users` | akun pengguna (`name`, `email`, `password`, `role`: admin / kasir) |
+| `categories` | kategori produk |
+| `products` | produk (`kode`, `nama`, `harga`, `stok`, `category_id`) |
+| `transactions` | satu baris per struk (`kode_transaksi`, `user_id`, `total`, `bayar`, `kembalian`) |
+| `transaction_items` | isi struk (`product_id`, `qty`, `harga`, `subtotal`) |
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Cara Menjalankan (Instalasi Lokal)
 
-## Code of Conduct
+### 1. Prasyarat
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- PHP 8.2+
+- Composer
+- MySQL (XAMPP / Laragon / MySQL biasa)
+- Git
 
-## Security Vulnerabilities
+### 2. Clone repository
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+git clone https://github.com/firjatullahwira/app-kasir.git
+cd app-kasir
+git checkout dev
+```
 
-## License
+### 3. Install dependency
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer install
+```
+
+### 4. Siapkan file `.env`
+
+Salin file contoh, lalu buat application key.
+
+Linux / macOS:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Windows (Command Prompt):
+
+```bash
+copy .env.example .env
+php artisan key:generate
+```
+
+### 5. Buat database dan atur koneksi
+
+Buat database kosong bernama `db_kasir` di MySQL / phpMyAdmin, lalu sesuaikan `.env`:
+
+```env
+APP_NAME="Aplikasi Kasir"
+APP_LOCALE=id
+APP_FAKER_LOCALE=id_ID
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=db_kasir
+DB_USERNAME=postgres
+DB_PASSWORD=
+```
+
+### 6. Migrasi dan isi data awal
+
+```bash
+php artisan migrate --seed
+```
+
+Perintah ini membuat semua tabel dan mengisi akun, kategori, serta produk contoh.
+
+### 7. Jalankan aplikasi
+
+```bash
+php artisan serve
+```
+
+Buka `http://127.0.0.1:8000` di browser.
+
+---
+
+## Akun Demo
+
+| Peran | Email | Password |
+|---|---|---|
+| Admin | `admin@kasir.test` | `password` |
+| Kasir | `kasir@kasir.test` | `password` |
+
+> Ganti password ini jika aplikasi dipakai di luar keperluan belajar.
+
+Reset data ke kondisi awal kapan saja:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## Daftar Halaman Utama
+
+| URL | Keterangan | Akses |
+|---|---|---|
+| `/login` | halaman login | publik |
+| `/` | dashboard | login |
+| `/transactions/create` | transaksi baru (kasir) | login |
+| `/transactions` | riwayat transaksi | login |
+| `/transactions/{id}` | struk transaksi | login |
+| `/categories` | kelola kategori | admin |
+| `/products` | kelola produk | admin |
+| `/laporan` | laporan penjualan | admin |
+
+---
+
+## REST API (opsional)
+
+Jika tahap API sudah dikerjakan, endpoint berikut tersedia. Kirim header `Accept: application/json`.
+
+| Method | URL | Keterangan |
+|---|---|---|
+| GET | `/api/products` | daftar produk (10 per halaman, bisa `?search=`) |
+| GET | `/api/products/{id}` | detail satu produk |
+| GET | `/api/stats` | ringkasan total produk, transaksi dan omzet hari ini |
+
+> Endpoint API saat ini bersifat publik (tanpa token), hanya untuk keperluan pembelajaran.
+
+---
+
+## Struktur Kode Penting
+
+```
+app/
+├── Http/
+│   ├── Controllers/        # AuthController, CategoryController, ProductController,
+│   │                       # TransactionController, DashboardController, ReportController
+│   ├── Middleware/         # CheckAdminRole (membatasi halaman khusus admin)
+│   └── Requests/           # CategoryRequest, ProductRequest (validasi form)
+└── Models/                 # User, Category, Product, Transaction, TransactionItem
+database/
+├── migrations/             # struktur tabel
+└── seeders/                # data awal
+resources/views/            # tampilan Blade (layouts, partials, categories, products, transactions, ...)
+routes/web.php              # daftar route
+```
+
+---
+
+## Catatan Logika Penting
+
+- Total, kembalian, dan pengecekan stok dihitung **di server**, bukan dipercaya dari form.
+- Harga disimpan di `transaction_items` saat transaksi, sehingga struk lama tidak berubah walau harga produk diubah.
+- Transaksi tidak bisa diedit atau dihapus (data keuangan).
+- Kategori atau produk yang sudah dipakai tidak bisa dihapus.
+
+---
+
+## Pengembang
+
+- **Nama:** (isi nama kamu)
+- **NIM:** (isi NIM kamu)
+- **Kelas:** (isi kelas kamu)
